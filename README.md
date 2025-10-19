@@ -69,4 +69,4 @@ mvn clean install
 mvn spring-boot:run
 ```
 API Documentation
-You can view the OpenAPI specification here: [Plant System API Docs](https://July58.github.io/plant-monitoring-system/blob/main/redoc.html)
+You can view the OpenAPI specification here: [open-api.yaml](open-api.yaml)
