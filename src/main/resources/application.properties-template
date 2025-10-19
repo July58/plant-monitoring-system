@@ -1,0 +1,24 @@
+spring.application.name=
+server.port=
+
+jwt.secret=
+jwt.expirationMs =
+
+
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+
+
+plant.photo.save.directory=
+plant.camera.stream.port=
+plant.camera.stream.protocol=
+plant.camera.stream.path=
+plant.arduino.protocol =
+plant.arduino.path=
+plant.camera.capture.path =
+
+plant.camera.default.url=
