@@ -1,0 +1,961 @@
+openapi: 3.0.3
+info:
+  title: Plant System API
+  version: 1.0.0
+  description: API for plant monitoring and management
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/auth/sign-in:
+    post:
+      tags: [Auth]
+      summary: User sign-in
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: JWT token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Unauthorized
+
+  /api/auth/sign-up:
+    post:
+      tags: [Auth]
+      summary: User registration
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+      responses:
+        '200':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Invalid request body or validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Email format is invalid"
+
+  /api/plants:
+    post:
+      tags: [Plant]
+      summary: Create a new plant
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlantDtoCreate'
+      responses:
+        '200':
+          description: Plant created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+        '400':
+          description: Invalid request body or validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Email format is invalid"
+    put:
+      summary: Update a plant
+      security:
+        - bearerAuth: []
+      tags: [Plant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlantDto'
+      responses:
+        '200':
+          description: Plant updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+        '400':
+          description: Invalid request body or validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Email format is invalid"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /api/plants/{plantId}:
+    delete:
+      summary: Delete a plant
+      security:
+        - bearerAuth: []
+      tags: [Plant]
+      parameters:
+        - in: path
+          name: plantId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of plants after deletion
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlantDto'
+
+  /api/plants/plant-list:
+    get:
+      summary: Get all plants for user
+      security:
+        - bearerAuth: []
+      tags: [Plant]
+      responses:
+        '200':
+          description: List of plants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlantDto'
+
+  /api/plants/plant-general-info/{plantId}:
+    get:
+      summary: Get plant basic info
+      security:
+        - bearerAuth: []
+      tags: [Plant]
+      parameters:
+        - in: path
+          name: plantId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Plant info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlantDto'
+
+  /api/plants/plant-info/{plantId}:
+    get:
+      summary: Get plant info with current data
+      security:
+        - bearerAuth: []
+      tags: [Plant]
+      parameters:
+        - in: path
+          name: plantId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Plant info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlantResponse'
+  /api/get-plant-name/{plantId}:
+    get:
+      tags: [Plant]
+      summary: Get plant name by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          description: Unique identifier of the plant
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully retrieved plant name
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Aloe Vera"
+        '400':
+          description: Invalid plant ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Invalid plant ID format"
+        '404':
+          description: Plant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Plant not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Something went wrong"
+  /capture-photo:
+    post:
+      tags: [Camera]
+      summary: Capture a photo for a specific plant
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlantDto'
+      responses:
+        '201':
+          description: Photo captured successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Photo saved successfully"
+        '400':
+          description: Invalid plant ID or input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Invalid request data"
+        '404':
+          description: Plant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Plant not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Unexpected error occurred"
+
+  /{plantId}/images:
+    get:
+      tags: [Camera]
+      summary: Get all images for a specific plant
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Unique identifier of the plant
+      responses:
+        '200':
+          description: List of plant photos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhotoDto'
+        '404':
+          description: Plant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Plant not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /{photoId}:
+    delete:
+      tags: [Camera]
+      summary: Delete a photo by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: photoId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Unique identifier of the photo
+      responses:
+        '200':
+          description: Photo deleted successfully, returns updated photo list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhotoDto'
+        '404':
+          description: Photo not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Photo not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /{plantId}/filter-images:
+    get:
+      tags: [Camera]
+      summary: Filter plant images by date range
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Unique identifier of the plant
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End date (YYYY-MM-DD)
+      responses:
+        '200':
+          description: List of photos within the given date range
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhotoDto'
+        '404':
+          description: No photos found for given criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "No photos found in specified range"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /api/{plantId}/create-gif:
+    get:
+      tags: [Camera]
+      summary: Create an animated GIF from plant photos in a date range
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Unique identifier of the plant
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End date (YYYY-MM-DD)
+      responses:
+        '200':
+          description: GIF created successfully, returns updated photo list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhotoDto'
+        '404':
+          description: Plant or photos not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "No photos available for GIF creation"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /api/{plantId}/sensor-data:
+    get:
+      tags: [Sensor Data]
+      summary: Retrieve aggregated sensor data for a plant
+      description: Returns sensor readings aggregated over a given date range and interval.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          description: Unique identifier of the plant
+          schema:
+            type: integer
+            format: int64
+        - name: startDate
+          in: query
+          required: true
+          description: Start date in the format YYYY-MM-DD
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          description: End date in the format YYYY-MM-DD
+          schema:
+            type: string
+            format: date
+        - name: interval
+          in: query
+          required: true
+          description: Aggregation interval (e.g., hourly, daily, weekly)
+          schema:
+            type: string
+            example: "daily"
+      responses:
+        '200':
+          description: Successfully retrieved aggregated sensor data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AggregatedSensorDataDto'
+        '400':
+          description: Invalid date range or interval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Invalid date format or interval"
+        '404':
+          description: Plant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Plant not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Unexpected error occurred"
+
+  /api/{plantId}/generate-csv:
+    get:
+      tags: [Sensor Data]
+      summary: Generate a CSV report of sensor readings
+      description: Exports all sensor data for the given plant as a downloadable CSV file.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          description: Unique identifier of the plant
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: CSV file generated successfully
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+              example: (binary CSV data)
+          headers:
+            Content-Disposition:
+              description: Suggests a filename for the downloaded CSV
+              schema:
+                type: string
+                example: attachment; filename="sensor-data.csv"
+        '404':
+          description: Plant or sensor data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "No sensor data found for plant ID 1"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Error generating CSV file"
+  /api/{plantId}/create-note:
+    post:
+      tags: [Journal]
+      summary: Create a new note for a plant
+      description: Creates a new note associated with the specified plant for the authenticated user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          description: ID of the plant to which the note belongs
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteDto'
+      responses:
+        '201':
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Note created"
+        '400':
+          description: Invalid note data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Invalid note input"
+        '401':
+          description: Unauthorized — missing or invalid JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Unauthorized"
+        '404':
+          description: Plant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Plant not found"
+
+  /api/{plantId}:
+    get:
+      tags: [Journal]
+      summary: Get all notes for a plant
+      description: Returns all notes related to a specific plant, sorted by date (newest first).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          description: ID of the plant whose notes are retrieved
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of notes for the specified plant
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NoteDto'
+        '404':
+          description: Plant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Plant not found"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Unauthorized"
+
+  /api/{plantId}/{noteId}:
+    delete:
+      tags: [Journal]
+      summary: Delete a note by ID
+      description: Deletes a specific note by ID and returns the updated list of notes for the same plant.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          description: ID of the plant associated with the note
+          schema:
+            type: integer
+            format: int64
+        - name: noteId
+          in: path
+          required: true
+          description: ID of the note to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Note deleted and updated list returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NoteDto'
+        '404':
+          description: Note or plant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Note not found"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Unauthorized"
+
+  /api/{plantId}/edit-note:
+    put:
+      tags: [Journal]
+      summary: Update an existing note
+      description: Updates an existing note for the specified plant and authenticated user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plantId
+          in: path
+          required: true
+          description: ID of the plant associated with the note
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteDto'
+      responses:
+        '200':
+          description: Note updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Note is updated successfully!"
+        '400':
+          description: Invalid note update request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Invalid note update request"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Unauthorized"
+        '404':
+          description: Note or plant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: "Note not found"
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        info:
+          type: string
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    PlantDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        plantName:
+          type: string
+        type:
+          type: string
+        info:
+          type: string
+        system_ip:
+          type: string
+        camera_ip:
+          type: string
+        ownerId:
+          type: integer
+        location:
+          type: string
+        plantDate:
+          type: string
+          format: date-time
+
+    PlantDtoCreate:
+      type: object
+      properties:
+        plantName:
+          type: string
+        type:
+          type: string
+        info:
+          type: string
+        system_ip:
+          type: string
+        camera_ip:
+          type: string
+        location:
+          type: string
+
+
+
+
+    PlantResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        plantName:
+          type: string
+        type:
+          type: string
+        info:
+          type: string
+        location:
+          type: string
+        plantAge:
+          type: string
+        system_ip:
+          type: string
+        camera_ip:
+          type: string
+        ownerId:
+          type: integer
+        sensorData:
+          $ref: '#/components/schemas/SensorDataDto'
+
+    NoteDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        text:
+          type: string
+        noteDate:
+          type: string
+          format: date-time
+        userId:
+          type: integer
+        plantId:
+          type: integer
+
+    SensorDataDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        temperature:
+          type: number
+        humidity:
+          type: number
+        ds18b20Temperature:
+          type: number
+        soilMoisture:
+          type: number
+        photoresistorValue:
+          type: integer
+        dataTime:
+          type: string
+          format: date-time
+
+    AggregatedSensorDataDto:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        avgTemperature:
+          type: number
+        avgHumidity:
+          type: number
+        avgDs18b20Temperature:
+          type: number
+        avgSoilMoisture:
+          type: number
+        avgPhotoresistorValue:
+          type: number
+
+    PhotoDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        imageData:
+          type: string
+          format: byte
+        dateTime:
+          type: string
+          format: date-time
